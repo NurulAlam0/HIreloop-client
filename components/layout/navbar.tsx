@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
 import { LogOut, MenuIcon } from "lucide-react"
 
@@ -19,9 +19,9 @@ import { signOut, useSession } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 
 const NAV_LINKS = [
-  { label: "Browse Jobs", href: "#browse-jobs" },
-  { label: "Company", href: "#company" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Browse Jobs", href: "/jobs" },
+  { label: "Company", href: "/#company" },
+  { label: "Pricing", href: "/#pricing" },
 ]
 
 export function Logo({
@@ -53,7 +53,9 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
   const { data: session, isPending } = useSession()
+  const pathname = usePathname()
   const router = useRouter()
+  const isJobsPage = pathname === "/jobs"
 
   const user = session?.user
   const initial =
@@ -73,22 +75,49 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-[#222225]/95 backdrop-blur-md">
-      <div className="mx-auto flex h-[68px] w-full max-w-[1680px] items-center justify-between gap-6 px-5 sm:px-8 lg:h-24 lg:px-12 xl:pr-16 xl:pl-24">
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full backdrop-blur-md",
+        isJobsPage ? "bg-[#08080a]/95" : "bg-[#222225]/95"
+      )}
+    >
+      <div
+        className={cn(
+          "mx-auto flex w-full items-center justify-between gap-6 px-5 sm:px-8",
+          isJobsPage
+            ? "h-16 max-w-[832px] lg:px-0"
+            : "max-w-[1680px] lg:h-24 lg:px-12 xl:pr-16 xl:pl-24"
+        )}
+      >
         {/* Brand */}
-        <Logo />
+        <Logo imgClassName={isJobsPage ? "h-7 sm:h-7 lg:h-7" : undefined} />
 
         <div className="flex items-center md:gap-8 lg:gap-10">
           {/* Desktop links */}
           <nav
             aria-label="Main navigation"
-            className="hidden items-center gap-8 md:flex lg:gap-10"
+            className={cn(
+              "hidden items-center md:flex",
+              isJobsPage ? "gap-5" : "gap-8 lg:gap-10"
+            )}
           >
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
-                className="text-[15px] font-medium text-[#c6c6ce] transition-colors hover:text-white"
+                aria-current={
+                  link.label === "Browse Jobs" && isJobsPage
+                    ? "page"
+                    : undefined
+                }
+                className={cn(
+                  "text-[15px] font-medium transition-colors hover:text-white",
+                  isJobsPage
+                    ? link.label === "Browse Jobs"
+                      ? "text-[#f4f4f5] underline underline-offset-4"
+                      : "text-[#c6c6ce]"
+                    : "text-[#c6c6ce]"
+                )}
               >
                 {link.label}
               </Link>
@@ -97,7 +126,12 @@ export function Navbar() {
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-2 md:gap-4 lg:gap-7">
+          <div
+            className={cn(
+              "flex items-center gap-2 md:gap-4",
+              isJobsPage ? "lg:gap-5" : "lg:gap-7"
+            )}
+          >
             {isPending ? (
               <span
                 aria-hidden="true"
@@ -128,14 +162,21 @@ export function Navbar() {
                 <Button
                   variant="ghost"
                   nativeButton={false}
-                  className="hidden px-0 text-[15px] font-medium text-[#c6c6ce] hover:bg-transparent hover:text-white md:inline-flex"
+                  className={cn(
+                    "hidden px-0 text-[15px] font-medium text-[#c6c6ce] hover:bg-transparent hover:text-white md:inline-flex",
+                    isJobsPage && "text-[13px]"
+                  )}
                   render={<Link href="/sign-in" />}
                 >
                   Sign In
                 </Button>
                 <Button
                   nativeButton={false}
-                  className="hidden h-11 rounded-xl bg-[#5c53fe] px-5 text-[14px] font-medium text-white hover:bg-[#6a62ff] md:inline-flex lg:h-[52px] lg:px-6"
+                  className={cn(
+                    "hidden h-11 rounded-xl bg-[#5c53fe] px-5 text-[14px] font-medium text-white hover:bg-[#6a62ff] md:inline-flex lg:h-[52px] lg:px-6",
+                    isJobsPage &&
+                      "h-9 rounded-md px-4 text-[13px] lg:h-9 lg:px-4"
+                  )}
                   render={<Link href="/sign-up" />}
                 >
                   Get Started
@@ -161,7 +202,7 @@ export function Navbar() {
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent
           side="right"
-          className="w-80 max-w-85vw gap-0 border-l border-white/10 bg-[#0c0c10]"
+          className="max-w-85vw w-80 gap-0 border-l border-white/10 bg-[#0c0c10]"
           showCloseButton
         >
           <SheetHeader className="border-b border-white/10 px-4 pb-4">
@@ -171,14 +212,17 @@ export function Navbar() {
             </SheetDescription>
             <Logo />
           </SheetHeader>
-          <nav aria-label="Mobile navigation" className="flex flex-col gap-1 p-4">
+          <nav
+            aria-label="Mobile navigation"
+            className="flex flex-col gap-1 p-4"
+          >
             {NAV_LINKS.map((link) => (
               <SheetClose
                 key={link.label}
                 nativeButton={false}
                 render={<Link href={link.href} />}
               >
-                <span className="block rounded-lg px-3 py-2.5 text-base font-medium text-foreground transition-colors hover:bg-white/5">
+                <span className="text-foreground block rounded-lg px-3 py-2.5 text-base font-medium transition-colors hover:bg-white/5">
                   {link.label}
                 </span>
               </SheetClose>
@@ -192,7 +236,7 @@ export function Navbar() {
                     {initial}
                   </span>
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-foreground">
+                    <p className="text-foreground truncate text-sm font-semibold">
                       {user.name}
                     </p>
                     <p className="truncate text-xs text-[#8f909e]">
@@ -218,7 +262,7 @@ export function Navbar() {
                       href="/sign-in"
                       className={cn(
                         buttonVariants({ variant: "ghost" }),
-                        "text-[#c6c6ce]",
+                        "text-[#c6c6ce]"
                       )}
                     />
                   }
@@ -232,7 +276,7 @@ export function Navbar() {
                       href="/sign-up"
                       className={cn(
                         buttonVariants(),
-                        "h-11 rounded-xl bg-[#5c53fe] text-white hover:bg-[#6a62ff]",
+                        "h-11 rounded-xl bg-[#5c53fe] text-white hover:bg-[#6a62ff]"
                       )}
                     />
                   }

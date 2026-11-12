@@ -1,4 +1,4 @@
-import { Discovery } from "@/components/landing/discovery"
+import { BrowseJobs } from "@/components/landing/browse-jobs"
 import { Features } from "@/components/landing/features"
 import { FinalCta } from "@/components/landing/final-cta"
 import { Hero } from "@/components/landing/hero"
@@ -12,7 +12,7 @@ export default function Page() {
       <Navbar />
       <main className="flex-1">
         <Hero />
-        <Discovery />
+        <BrowseJobs />
         <Features />
         <Pricing />
         <FinalCta />
