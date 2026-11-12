@@ -65,7 +65,9 @@ export function DashboardTopbar({
   const placeholder = isSeeker
     ? pathname.startsWith("/dashboard/seeker/applications")
       ? "Search applications..."
-      : "Search jobs, companies, or skills..."
+      : pathname.startsWith("/dashboard/seeker/billing")
+        ? "Search invoices or plans..."
+        : "Search jobs, companies, or skills..."
     : SEARCH_PLACEHOLDER[role]
 
   const initial =

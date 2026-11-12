@@ -9,6 +9,7 @@ import {
   Building2,
   CirclePlus,
   CreditCard,
+  FileUp,
   FileText,
   LayoutDashboard,
   LogOut,
@@ -41,30 +42,58 @@ type NavItem = {
 
 const NAV_ITEMS: Record<DashboardRole, NavItem[]> = {
   "job-seeker": [
-    { label: "Dashboard", icon: LayoutDashboard, href: DASHBOARD_ROUTES["job-seeker"] },
+    {
+      label: "Dashboard",
+      icon: LayoutDashboard,
+      href: DASHBOARD_ROUTES["job-seeker"],
+    },
     { label: "Jobs", icon: Briefcase },
-    { label: "Saved Jobs", icon: Bookmark, href: `${DASHBOARD_ROUTES["job-seeker"]}/saved-jobs` },
-    { label: "Applications", icon: FileText, href: `${DASHBOARD_ROUTES["job-seeker"]}/applications` },
-    { label: "Billing", icon: CreditCard },
-    { label: "Settings", icon: Settings },
+    {
+      label: "Saved Jobs",
+      icon: Bookmark,
+      href: `${DASHBOARD_ROUTES["job-seeker"]}/saved-jobs`,
+    },
+    {
+      label: "Applications",
+      icon: FileText,
+      href: `${DASHBOARD_ROUTES["job-seeker"]}/applications`,
+    },
+    {
+      label: "Billing",
+      icon: CreditCard,
+      href: `${DASHBOARD_ROUTES["job-seeker"]}/billing`,
+    },
+    {
+      label: "Settings",
+      icon: Settings,
+      href: `${DASHBOARD_ROUTES["job-seeker"]}/settings`,
+    },
   ],
   recruiter: [
-    { label: "Dashboard", icon: LayoutDashboard, href: DASHBOARD_ROUTES.recruiter },
+    {
+      label: "Dashboard",
+      icon: LayoutDashboard,
+      href: DASHBOARD_ROUTES.recruiter,
+    },
     {
       label: "Add Job",
       icon: CirclePlus,
       href: `${DASHBOARD_ROUTES.recruiter}/add-job`,
     },
-    { label: "Manage Jobs", icon: Briefcase, href: `${DASHBOARD_ROUTES.recruiter}/manage-jobs` },
+    {
+      label: "Manage Jobs",
+      icon: Briefcase,
+      href: `${DASHBOARD_ROUTES.recruiter}/manage-jobs`,
+    },
     { label: "Applications", icon: FileText },
     { label: "Settings", icon: Settings },
   ],
   admin: [
     { label: "Dashboard", icon: LayoutDashboard, href: DASHBOARD_ROUTES.admin },
-    { label: "Users", icon: Users },
+    { label: "Users", icon: Users, href: `${DASHBOARD_ROUTES.admin}/users` },
     { label: "Companies", icon: Building2 },
-    { label: "Jobs", icon: Briefcase },
-    { label: "Payments", icon: CreditCard },
+    { label: "Jobs", icon: Briefcase, href: `${DASHBOARD_ROUTES.admin}/jobs` },
+    { label: "Payments", icon: CreditCard, href: `${DASHBOARD_ROUTES.admin}/payments` },
     { label: "Settings", icon: Settings },
   ],
 }
@@ -81,6 +110,8 @@ export function DashboardSidebar({
   const pathname = usePathname()
   const router = useRouter()
   const isSeeker = role === "job-seeker"
+  const isSeekerSettings =
+    isSeeker && pathname === `${DASHBOARD_ROUTES["job-seeker"]}/settings`
   const initial =
     user.name.trim().charAt(0).toUpperCase() ||
     user.email.charAt(0).toUpperCase() ||
@@ -93,18 +124,18 @@ export function DashboardSidebar({
   }
 
   return (
-    <div className="flex h-full w-full flex-col bg-[#0b0b0c] px-3 pt-5 pb-4">
-      {isSeeker && (
-        <p className="ml-2.5 text-[12px] leading-4 font-medium text-[#8a8a93]">
-          Seeker Dashboard
-        </p>
+    <div
+      className={cn(
+        "flex h-full w-full flex-col bg-[#0b0b0c] pb-4",
+        isSeekerSettings ? "px-2 pt-4" : "px-3 pt-5"
       )}
+    >
       <Link
         href="/"
         aria-label="HireLoop home"
         className={cn(
-          "ml-2.5 inline-flex h-8 w-fit items-center",
-          isSeeker && "mt-1.5",
+          "inline-flex h-6 w-fit items-center",
+          isSeekerSettings ? "ml-2" : "ml-2.5 h-8"
         )}
       >
         <Image
@@ -113,19 +144,43 @@ export function DashboardSidebar({
           width={206}
           height={66}
           priority
-          className="h-8 w-auto"
+          className={cn("w-auto", isSeekerSettings ? "h-6" : "h-8")}
         />
       </Link>
 
-      <nav aria-label="Dashboard" className="mt-5 flex flex-col gap-0.5">
+      {isSeekerSettings && (
+        <div className="mt-3 flex h-[42px] items-center gap-2 rounded-lg border border-white/[0.07] bg-[#141416] px-2">
+          <span
+            aria-hidden="true"
+            className="grid size-[22px] shrink-0 place-items-center rounded-full bg-gradient-to-br from-[#8079ff] to-[#4a42d8] text-[9px] font-semibold text-white ring-1 ring-white/10"
+          >
+            {initial}
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-[13px] leading-[18px] font-semibold text-[#f4f4f5]">
+              Seeker Portal
+            </span>
+            <span className="block truncate text-[10px] leading-[14px] text-[#8a8a93]">
+              Professional Tier
+            </span>
+          </span>
+        </div>
+      )}
+
+      <nav
+        aria-label="Dashboard"
+        className={cn(
+          "flex flex-col gap-0.5",
+          isSeekerSettings ? "mt-3" : "mt-5"
+        )}
+      >
         {NAV_ITEMS[role].map((item) => {
           const Icon = item.icon
           const isRoot = item.href === DASHBOARD_ROUTES[role]
           const active = item.href
             ? isRoot
               ? pathname === item.href
-              : pathname === item.href ||
-                pathname.startsWith(`${item.href}/`)
+              : pathname === item.href || pathname.startsWith(`${item.href}/`)
             : false
 
           const content = (
@@ -134,8 +189,9 @@ export function DashboardSidebar({
                 <span
                   aria-hidden="true"
                   className={cn(
-                    "absolute top-[9px] h-4 w-0.5 rounded-full bg-[#5c53fe]",
-                    isSeeker ? "left-0" : "right-2",
+                    "absolute h-4 w-0.5 rounded-full bg-[#5c53fe]",
+                    isSeekerSettings ? "top-[5px]" : "top-[9px]",
+                    isSeeker ? "left-0" : "right-2"
                   )}
                 />
               )}
@@ -143,7 +199,7 @@ export function DashboardSidebar({
                 aria-hidden="true"
                 className={cn(
                   "size-[18px] shrink-0",
-                  isSeeker && active && "text-[#9992ff]",
+                  isSeeker && active && "text-[#9992ff]"
                 )}
                 strokeWidth={1.7}
               />
@@ -152,10 +208,12 @@ export function DashboardSidebar({
           )
 
           const className = cn(
-            "relative flex h-[34px] items-center gap-2.5 rounded-md pr-3 pl-2.5 text-[13px] font-medium transition-colors",
+            cn(
+              "relative flex h-[34px] items-center gap-2.5 rounded-md pr-3 pl-2.5 text-[13px] font-medium transition-colors"
+            ),
             active
               ? "bg-[#232327] text-[#f4f4f5]"
-              : "text-[#a1a4aa] hover:bg-[#1b1b1e] hover:text-[#f4f4f5]",
+              : "text-[#a1a4aa] hover:bg-[#1b1b1e] hover:text-[#f4f4f5]"
           )
 
           if (!item.href) {
@@ -185,7 +243,26 @@ export function DashboardSidebar({
         })}
       </nav>
 
-      {isSeeker ? (
+      {isSeekerSettings ? (
+        <div className="mt-auto flex flex-col gap-2">
+          <Link
+            href={`${DASHBOARD_ROUTES["job-seeker"]}/settings#resume`}
+            onClick={onNavigate}
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-[#fafafa] text-[13px] leading-5 font-semibold text-[#111318] transition-colors hover:bg-white"
+          >
+            <FileUp aria-hidden="true" className="size-3.5" strokeWidth={1.8} />
+            Post Resume
+          </Link>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="flex h-7 items-center gap-2 px-2.5 text-[12px] text-[#a1a4aa] transition-colors hover:text-white"
+          >
+            <LogOut aria-hidden="true" className="size-3.5" strokeWidth={1.8} />
+            Logout
+          </button>
+        </div>
+      ) : isSeeker ? (
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
@@ -222,7 +299,9 @@ export function DashboardSidebar({
               <p className="truncate text-[13px] font-semibold text-[#f4f4f5]">
                 {user.name}
               </p>
-              <p className="truncate text-[12px] text-[#8f909e]">{user.email}</p>
+              <p className="truncate text-[12px] text-[#8f909e]">
+                {user.email}
+              </p>
             </div>
             <DropdownMenuSeparator className="my-1.5 bg-white/[0.07]" />
             <DropdownMenuItem
