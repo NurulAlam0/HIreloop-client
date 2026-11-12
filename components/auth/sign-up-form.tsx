@@ -15,6 +15,7 @@ import {
 } from "lucide-react"
 
 import { signUp } from "@/lib/auth-client"
+import { DASHBOARD_ROUTES } from "@/lib/dashboard"
 import { cn } from "@/lib/utils"
 
 const ROLES = [
@@ -60,7 +61,7 @@ export function SignUpForm() {
         )
         return
       }
-      router.push("/")
+      router.push(DASHBOARD_ROUTES[role])
     } catch {
       setError("We couldn't reach the server. Please try again in a moment.")
     } finally {

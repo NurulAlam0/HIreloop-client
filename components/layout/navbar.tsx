@@ -105,13 +105,14 @@ export function Navbar() {
               />
             ) : user ? (
               <>
-                <span
+                <Link
+                  href="/dashboard"
                   title={user.name}
-                  aria-label={`Signed in as ${user.name}`}
-                  className="hidden size-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#8079ff] to-[#4a42d8] text-[16px] font-semibold text-white ring-1 ring-white/15 md:inline-flex"
+                  aria-label={`Open dashboard for ${user.name}`}
+                  className="hidden size-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#8079ff] to-[#4a42d8] text-[16px] font-semibold text-white ring-1 ring-white/15 transition hover:brightness-110 md:inline-flex"
                 >
                   {initial}
-                </span>
+                </Link>
                 <Button
                   variant="ghost"
                   onClick={handleSignOut}

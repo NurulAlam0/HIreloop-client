@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { Eye, EyeOff, LoaderCircle, Lock, Mail } from "lucide-react"
 
 import { signIn } from "@/lib/auth-client"
+import { dashboardRoute } from "@/lib/dashboard"
 
 export function SignInForm() {
   const router = useRouter()
@@ -33,7 +34,7 @@ export function SignInForm() {
         setError(result.error.message ?? "Those credentials didn't work.")
         return
       }
-      router.push("/")
+      router.push(dashboardRoute(result.data?.user?.role))
     } catch {
       setError("We couldn't reach the server. Please try again in a moment.")
     } finally {
