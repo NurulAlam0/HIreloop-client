@@ -1,26 +1,11 @@
 import Link from "next/link"
-import {
-  ArrowRight,
-  Briefcase,
-  ChartNoAxesColumn,
-  FolderOpen,
-  MapPin,
-  Search,
-  Star,
-} from "lucide-react"
+import { ArrowRight, Briefcase, MapPin, Search } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Planet } from "@/components/landing/planet"
 import { cn } from "@/lib/utils"
 
 const CHIPS = ["Product Designer", "AI Engineering", "Devops Engineer"]
-
-const STATS = [
-  { icon: Briefcase, value: "50K", label: "Active Jobs" },
-  { icon: ChartNoAxesColumn, value: "12K", label: "Companies" },
-  { icon: FolderOpen, value: "2M", label: "Job Seekers" },
-  { icon: Star, value: "97%", label: "Satisfaction Rate" },
-]
 
 export function Eyebrow({
   children,
@@ -127,7 +112,7 @@ export function Hero() {
           {CHIPS.map((chip) => (
             <Link
               key={chip}
-              href="#browse-jobs"
+              href="/jobs"
               className="rounded-full border border-white/[0.09] bg-white/[0.03] px-4 py-2 text-[13px] font-medium text-[#a7a7b2] transition-colors hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground"
             >
               {chip}
@@ -136,9 +121,9 @@ export function Hero() {
         </div>
       </div>
 
-      {/* Globe + stats */}
+      {/* Globe */}
       <div className="relative mt-16 sm:mt-20 lg:mt-24">
-        {/* Atmosphere, stars and the planet itself sit behind the caption + stats */}
+        {/* Atmosphere, stars and the planet itself sit behind the caption */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-0 top-0 h-[560px] sm:h-[700px] lg:h-[800px]"
@@ -155,29 +140,6 @@ export function Hero() {
           <p className="absolute inset-x-0 top-[31%] mx-auto max-w-[560px] px-6 text-center text-[22px] leading-[1.3] font-medium tracking-[-0.01em] text-balance text-[#f2f1f7] sm:top-[34%] sm:text-[27px] lg:top-[47.7%] lg:max-w-[660px] lg:text-[38px] lg:leading-[1.2]">
             Assisting over 15,000 job seekers find their dream positions.
           </p>
-        </div>
-
-        {/* Stats */}
-        <div className="relative z-20 mx-auto -mt-[110px] grid max-w-[1322px] grid-cols-2 gap-3 px-4 sm:-mt-[140px] sm:px-6 md:grid-cols-4 lg:-mt-[146px] lg:gap-4">
-          {STATS.map(({ icon: Icon, value, label }) => (
-            <div
-              key={label}
-              className="flex min-h-[170px] flex-col rounded-2xl border border-white/[0.1] bg-[#08080b] p-5 sm:min-h-[252px] sm:p-6"
-            >
-              <Icon
-                className="size-[18px] text-[#a4a4af]"
-                strokeWidth={1.6}
-              />
-              <div className="mt-auto pt-8">
-                <p className="text-[34px] leading-none font-bold tracking-[-0.02em] text-[#f4f3f8] sm:text-[40px]">
-                  {value}
-                </p>
-                <p className="mt-2 text-[12px] text-[#8f8f9a] sm:text-[13px]">
-                  {label}
-                </p>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </section>
