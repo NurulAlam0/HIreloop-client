@@ -275,6 +275,18 @@ export async function getJobForOwner(
   return doc ? toDTO(doc) : null
 }
 
+export async function getJobById(id: string): Promise<JobDTO | null> {
+  if (!isObjectId(id)) {
+    return null
+  }
+
+  const doc = await (await collection()).findOne({
+    _id: new ObjectId(id),
+  })
+
+  return doc ? toDTO(doc) : null
+}
+
 export async function createJob(
   ownerId: string,
   input: JobInput,

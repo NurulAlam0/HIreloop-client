@@ -4,6 +4,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import {
   deleteJob,
+  getJobById,
   updateJob,
   updateJobStatus,
   validateJobInput,
@@ -14,6 +15,30 @@ async function currentUserId() {
   const session = await auth.api.getSession({ headers: await headers() })
 
   return session?.user?.id ?? null
+}
+
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params
+
+  try {
+    const job = await getJobById(id)
+
+    if (!job) {
+      return NextResponse.json({ error: "Job not found." }, { status: 404 })
+    }
+
+    return NextResponse.json({ job })
+  } catch (error) {
+    console.error("Failed to load job", error)
+
+    return NextResponse.json(
+      { error: "Could not load this job." },
+      { status: 500 },
+    )
+  }
 }
 
 export async function PATCH(
