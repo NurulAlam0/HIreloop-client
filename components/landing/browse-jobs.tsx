@@ -196,6 +196,10 @@ export function BrowseJobs({ standalone = false }: { standalone?: boolean }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Job ids the signed-in user already applied to. null = not loaded yet
+  // (signed-out visitors never see status badges).
+  const [appliedIds, setAppliedIds] = useState<Set<string> | null>(null)
+
   // Uncommitted input values (committed on Enter / button click).
   const [searchInput, setSearchInput] = useState(() => activeFilters.search)
   const [locationInput, setLocationInput] = useState(
@@ -264,6 +268,44 @@ export function BrowseJobs({ standalone = false }: { standalone?: boolean }) {
 
     return () => controller.abort()
   }, [typeFilter, categoryFilter, remoteMode, salaryMin, salaryMax, locationQuery, searchQuery])
+
+  // Which jobs has this user applied to? Signed-out visitors get 401 → no badges.
+  useEffect(() => {
+    const controller = new AbortController()
+
+    async function fetchApplied() {
+      try {
+        const response = await fetch("/api/seeker/applications", {
+          signal: controller.signal,
+        })
+
+        if (!response.ok) return
+
+        const payload: unknown = await response.json()
+
+        if (
+          isRecord(payload) &&
+          Array.isArray(payload.applications) &&
+          payload.applications.every(
+            (item) =>
+              isRecord(item) && typeof item.jobId === "string",
+          )
+        ) {
+          setAppliedIds(
+            new Set(
+              payload.applications.map((item) => (item as { jobId: string }).jobId),
+            ),
+          )
+        }
+      } catch {
+        // AbortError or network failure — just leave badges hidden.
+      }
+    }
+
+    void fetchApplied()
+
+    return () => controller.abort()
+  }, [])
 
   function applyFilters(patch: Partial<JobFilters>) {
     if (standalone) {
@@ -537,10 +579,15 @@ export function BrowseJobs({ standalone = false }: { standalone?: boolean }) {
                 >
                   Found {jobs.length} Professional Jobs
                 </h2>
-                {activeFilterCount > 0 && (
+                {(activeFilterCount > 0 || appliedIds) && (
                   <p className="mt-1 text-[12px] text-[#a0a0ab]">
-                    {activeFilterCount} filter
-                    {activeFilterCount > 1 ? "s" : ""} active
+                    {activeFilterCount > 0 &&
+                      `${activeFilterCount} filter${activeFilterCount > 1 ? "s" : ""} active`}
+                    {activeFilterCount > 0 && appliedIds && " • "}
+                    {appliedIds &&
+                      `${
+                        jobs.filter((job) => appliedIds.has(job.id)).length
+                      } of ${jobs.length} applied`}
                   </p>
                 )}
               </div>
@@ -598,9 +645,17 @@ export function BrowseJobs({ standalone = false }: { standalone?: boolean }) {
                         <div className="flex items-center gap-3">
                           <JobLogo />
                           <div className="min-w-0">
-                            <h3 className="text-[15px] leading-5 font-semibold text-[#ededef] sm:text-lg">
-                              {job.title}
-                            </h3>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h3 className="text-[15px] leading-5 font-semibold text-[#ededef] sm:text-lg">
+                                {job.title}
+                              </h3>
+                              {appliedIds?.has(job.id) && (
+                                <span className="inline-flex items-center gap-1 rounded-full border border-[#22c55e]/30 bg-[#22c55e]/10 px-2 py-0.5 text-[11px] leading-4 font-medium text-[#4ade80]">
+                                  <Check className="size-3" strokeWidth={2.5} />
+                                  Applied
+                                </span>
+                              )}
+                            </div>
                             <p className="mt-1 text-[12px] leading-4 text-[#a0a0ab]">
                               {job.company} •{" "}
                               {job.isRemote
