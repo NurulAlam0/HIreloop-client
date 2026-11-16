@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import type { Metadata } from "next"
 
 import { BrowseJobs } from "@/components/landing/browse-jobs"
@@ -13,7 +14,15 @@ export default function JobsPage() {
     <div className="min-h-svh bg-[#08080a]">
       <Navbar />
       <main>
-        <BrowseJobs standalone />
+        <Suspense
+          fallback={
+            <p className="py-20 text-center text-[13px] text-[#a0a0ab]">
+              Loading jobs…
+            </p>
+          }
+        >
+          <BrowseJobs standalone />
+        </Suspense>
       </main>
     </div>
   )

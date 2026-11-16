@@ -7,6 +7,17 @@ export const JOB_TYPES = [
 
 export type JobType = (typeof JOB_TYPES)[number]
 
+export const JOB_CATEGORIES = [
+  "Engineering",
+  "Design",
+  "Marketing",
+  "Infrastructure",
+  "Quality",
+  "Product",
+] as const
+
+export type JobCategory = (typeof JOB_CATEGORIES)[number]
+
 export const JOB_FREQUENCIES = [
   "per hour",
   "per day",
