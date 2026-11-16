@@ -1,21 +1,31 @@
-# Next.js template
+# HireLoop
 
-This is a Next.js template with shadcn/ui.
+HireLoop is a Next.js frontend with a MongoDB-backed Express API.
 
-## Adding components
+## Local development
 
-To add components to your app, run the following command:
+Set `BETTER_AUTH_MONGODB_URI`, `BETTER_AUTH_SECRET`, and `BETTER_AUTH_URL` in
+`.env`. The frontend and Express backend use the same MongoDB database,
+`hireloopdb`.
+
+In `.env`, set these API URLs if they differ from the local defaults:
+
+```env
+NEXT_PUBLIC_BACKEND_URL=http://localhost:5000
+FRONTEND_URL=http://localhost:3000
+```
+
+Run the frontend and backend in separate terminals:
 
 ```bash
-npx shadcn@latest add button
+npm run backend
+npm run dev
 ```
 
-This will place the ui components in the `components` directory.
+If another backend already uses port `5000`, stop it before starting this one.
+If you choose a different port, set `PORT` and `NEXT_PUBLIC_BACKEND_URL` to
+matching values.
 
-## Using components
-
-To use the components in your app, import them as follows:
-
-```tsx
-import { Button } from "@/components/ui/button";
-```
+The Express API serves public job listings at `GET /jobs` and a public job
+detail at `GET /jobs/:id`. Job creation and recruiter dashboard operations
+continue to use the authenticated Next.js API routes.
