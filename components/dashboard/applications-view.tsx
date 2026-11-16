@@ -20,11 +20,7 @@ import { CARD_CLASS } from "@/components/dashboard/primitives"
 import { cn } from "@/lib/utils"
 
 type ApplicationStatus =
-  | "Applied"
-  | "Review"
-  | "Shortlisted"
-  | "Rejected"
-  | "Offered"
+  "Applied" | "Review" | "Interview" | "Shortlisted" | "Rejected" | "Offered"
 
 type Application = {
   id: string
@@ -69,6 +65,7 @@ const PAGE_SIZE = 5
 const STATUS_STYLES: Record<ApplicationStatus, string> = {
   Applied: "border-white/10 bg-white/[0.06] text-[#b4b4bc]",
   Review: "border-[#f59e0b]/25 bg-[#f59e0b]/10 text-[#f59e0b]",
+  Interview: "border-[#8f88ff]/30 bg-[#8f88ff]/15 text-[#8f88ff]",
   Shortlisted: "border-[#60a5fa]/25 bg-[#60a5fa]/10 text-[#60a5fa]",
   Rejected: "border-[#ef4444]/25 bg-[#ef4444]/10 text-[#ef4444]",
   Offered: "border-[#22c55e]/25 bg-[#22c55e]/10 text-[#22c55e]",
@@ -119,7 +116,7 @@ function StatusBadge({ status }: { status: ApplicationStatus }) {
     <span
       className={cn(
         "inline-flex h-[22px] items-center rounded-full border px-2.5 text-[12px] leading-4 font-medium whitespace-nowrap",
-        STATUS_STYLES[status],
+        STATUS_STYLES[status]
       )}
     >
       {status}
@@ -140,14 +137,14 @@ function SummaryCard({
     <div
       className={cn(
         CARD_CLASS,
-        "flex h-[84px] flex-col justify-center gap-0.5 px-5 sm:px-6",
+        "flex h-[84px] flex-col justify-center gap-0.5 px-5 sm:px-6"
       )}
     >
       <p className="text-[13px] leading-5 text-[#a0a0ab]">{label}</p>
       <p
         className={cn(
           "text-[26px] leading-8 font-semibold tracking-[-0.02em] text-[#ededef]",
-          valueClassName,
+          valueClassName
         )}
       >
         {value}
@@ -190,7 +187,7 @@ function Pagination({
             "grid size-8 place-items-center rounded-lg text-[13px] leading-5 font-medium transition-colors",
             value === page
               ? "bg-[#f4f4f5] text-[#111318]"
-              : "text-[#a0a0ab] hover:bg-white/[0.06] hover:text-white",
+              : "text-[#a0a0ab] hover:bg-white/[0.06] hover:text-white"
           )}
         >
           {value}
@@ -260,7 +257,7 @@ export function ApplicationsView() {
         setApplications([])
         setError("Could not load your applications.")
         setLoading(false)
-      },
+      }
     )
 
     return () => {
@@ -282,25 +279,25 @@ export function ApplicationsView() {
         setApplications([])
         setError("Could not load your applications.")
         setLoading(false)
-      },
+      }
     )
   }
 
   const applicationsForTab = useMemo(() => {
     if (tab === "active") {
       return applications.filter(
-        (application) => !ARCHIVED_STATUSES.includes(application.status),
+        (application) => !ARCHIVED_STATUSES.includes(application.status)
       )
     }
 
     return applications.filter((application) =>
-      ARCHIVED_STATUSES.includes(application.status),
+      ARCHIVED_STATUSES.includes(application.status)
     )
   }, [applications, tab])
 
   const totalPages = Math.max(
     1,
-    Math.ceil(applicationsForTab.length / PAGE_SIZE),
+    Math.ceil(applicationsForTab.length / PAGE_SIZE)
   )
   const currentPage = Math.min(page, totalPages)
 
@@ -308,29 +305,24 @@ export function ApplicationsView() {
     () =>
       applicationsForTab.slice(
         (currentPage - 1) * PAGE_SIZE,
-        currentPage * PAGE_SIZE,
+        currentPage * PAGE_SIZE
       ),
-    [applicationsForTab, currentPage],
+    [applicationsForTab, currentPage]
   )
 
   const start =
-    applicationsForTab.length === 0
-      ? 0
-      : (currentPage - 1) * PAGE_SIZE + 1
-  const end = Math.min(
-    currentPage * PAGE_SIZE,
-    applicationsForTab.length,
-  )
+    applicationsForTab.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1
+  const end = Math.min(currentPage * PAGE_SIZE, applicationsForTab.length)
 
   const total = applications.length
   const shortlisted = applications.filter(
-    (application) => application.status === "Shortlisted",
+    (application) => application.status === "Shortlisted"
   ).length
   const inReview = applications.filter(
-    (application) => application.status === "Review",
+    (application) => application.status === "Review"
   ).length
   const offered = applications.filter(
-    (application) => application.status === "Offered",
+    (application) => application.status === "Offered"
   ).length
   const successRate = total === 0 ? 0 : Math.round((offered / total) * 100)
 
@@ -366,7 +358,7 @@ export function ApplicationsView() {
                   "h-8 rounded-md px-4 text-[13px] leading-5 font-medium capitalize transition-colors",
                   tab === value
                     ? "bg-[#232327] text-[#f4f4f5]"
-                    : "text-[#a0a0ab] hover:text-[#ededef]",
+                    : "text-[#a0a0ab] hover:text-[#ededef]"
                 )}
               >
                 {value === "active" ? "Active" : "Archived"}
@@ -439,9 +431,7 @@ export function ApplicationsView() {
             <tbody>
               {loading ? (
                 <TableMessage>
-                  <span className="text-[#8a8a93]">
-                    Loading applications…
-                  </span>
+                  <span className="text-[#8a8a93]">Loading applications…</span>
                 </TableMessage>
               ) : error ? (
                 <TableMessage>
@@ -481,7 +471,7 @@ export function ApplicationsView() {
                           <span
                             className={cn(
                               "grid size-10 shrink-0 place-items-center rounded-lg bg-[#232327]",
-                              application.tileClassName,
+                              application.tileClassName
                             )}
                           >
                             <Icon

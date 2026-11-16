@@ -85,7 +85,11 @@ const NAV_ITEMS: Record<DashboardRole, NavItem[]> = {
       icon: Briefcase,
       href: `${DASHBOARD_ROUTES.recruiter}/manage-jobs`,
     },
-    { label: "Applications", icon: FileText },
+    {
+      label: "Applications",
+      icon: FileText,
+      href: `${DASHBOARD_ROUTES.recruiter}/applications`,
+    },
     { label: "Settings", icon: Settings },
   ],
   admin: [
@@ -93,7 +97,11 @@ const NAV_ITEMS: Record<DashboardRole, NavItem[]> = {
     { label: "Users", icon: Users, href: `${DASHBOARD_ROUTES.admin}/users` },
     { label: "Companies", icon: Building2 },
     { label: "Jobs", icon: Briefcase, href: `${DASHBOARD_ROUTES.admin}/jobs` },
-    { label: "Payments", icon: CreditCard, href: `${DASHBOARD_ROUTES.admin}/payments` },
+    {
+      label: "Payments",
+      icon: CreditCard,
+      href: `${DASHBOARD_ROUTES.admin}/payments`,
+    },
     { label: "Settings", icon: Settings },
   ],
 }
