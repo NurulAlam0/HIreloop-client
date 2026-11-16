@@ -90,7 +90,11 @@ const NAV_ITEMS: Record<DashboardRole, NavItem[]> = {
       icon: FileText,
       href: `${DASHBOARD_ROUTES.recruiter}/applications`,
     },
-    { label: "Settings", icon: Settings },
+    {
+      label: "Settings",
+      icon: Settings,
+      href: `${DASHBOARD_ROUTES.recruiter}/settings`,
+    },
   ],
   admin: [
     { label: "Dashboard", icon: LayoutDashboard, href: DASHBOARD_ROUTES.admin },

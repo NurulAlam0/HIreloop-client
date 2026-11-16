@@ -110,7 +110,13 @@ function SectionHeading({ step, title }: { step: number; title: string }) {
   )
 }
 
-export function PostJobForm({ job }: { job?: JobDTO }) {
+export function PostJobForm({
+  job,
+  defaultCompany,
+}: {
+  job?: JobDTO
+  defaultCompany?: string
+}) {
   const router = useRouter()
   const isEdit = Boolean(job)
 
@@ -305,7 +311,8 @@ export function PostJobForm({ job }: { job?: JobDTO }) {
                 <input
                   id="company-name"
                   name="companyName"
-                  defaultValue={job?.company ?? "HirePulse Network"}
+                  defaultValue={job?.company ?? defaultCompany ?? ""}
+                  placeholder="e.g. Acme Inc."
                   aria-invalid={Boolean(fieldErrors.company)}
                   aria-describedby={
                     fieldErrors.company ? "company-name-error" : undefined
