@@ -34,7 +34,13 @@ export function SignInForm() {
         setError(result.error.message ?? "Those credentials didn't work.")
         return
       }
-      router.push(dashboardRoute(result.data?.user?.role))
+      // Honor ?next= (e.g. "Apply Now" bounced us here); only allow
+      // same-origin paths so this can't become an open redirect.
+      const next = new URLSearchParams(window.location.search).get("next")
+      const safeNext =
+        next && next.startsWith("/") && !next.startsWith("//") ? next : null
+
+      router.push(safeNext ?? dashboardRoute(result.data?.user?.role))
     } catch {
       setError("We couldn't reach the server. Please try again in a moment.")
     } finally {

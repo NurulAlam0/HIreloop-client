@@ -1,29 +1,18 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import Link from "next/link"
+import { useEffect, useMemo, useState } from "react"
 import {
-  Activity,
-  BarChart3,
-  Boxes,
-  BrainCircuit,
+  Briefcase,
   ChevronLeft,
   ChevronRight,
   ClipboardCheck,
   ClipboardList,
-  Cloud,
   Code2,
-  Cpu,
-  Database,
   Download,
-  Layers,
-  LayoutDashboard,
   Palette,
   PenTool,
-  Rocket,
   Server,
-  ShieldCheck,
-  Smartphone,
-  Terminal,
   type LucideIcon,
 } from "lucide-react"
 
@@ -39,6 +28,7 @@ type ApplicationStatus =
 
 type Application = {
   id: string
+  jobId: string
   title: string
   company: string
   employment: string
@@ -49,332 +39,30 @@ type Application = {
   tileClassName?: string
 }
 
-const ACTIVE_APPLICATIONS: Application[] = [
-  {
-    id: "stark-frontend",
-    title: "Senior Frontend Engineer",
-    company: "Stark Industries",
-    employment: "Full-time",
-    location: "Remote",
-    applied: "2 hours ago",
-    status: "Applied",
-    icon: Code2,
-  },
-  {
-    id: "cyberdyne-product-designer",
-    title: "Product Designer",
-    company: "Cyberdyne Systems",
-    employment: "Contract",
-    location: "Hybrid",
-    applied: "1 day ago",
-    status: "Review",
-    icon: Rocket,
-  },
-  {
-    id: "wayne-data-scientist",
-    title: "Lead Data Scientist",
-    company: "Wayne Enterprises",
-    employment: "Full-time",
-    location: "On-site",
-    applied: "4 days ago",
-    status: "Shortlisted",
-    icon: Database,
-  },
-  {
-    id: "oscorp-cloud-architect",
-    title: "Cloud Architect",
-    company: "Oscorp Tech",
-    employment: "Full-time",
-    location: "Remote",
-    applied: "1 week ago",
-    status: "Rejected",
-    icon: Cloud,
-    tileClassName: "bg-[#b91c1c]",
-  },
-  {
-    id: "hooli-ai-researcher",
-    title: "AI Research Engineer",
-    company: "Hooli Corp",
-    employment: "Full-time",
-    location: "Hybrid",
-    applied: "2 weeks ago",
-    status: "Offered",
-    icon: Cpu,
-  },
-  {
-    id: "initech-backend",
-    title: "Backend Engineer",
-    company: "Initech",
-    employment: "Full-time",
-    location: "Remote",
-    applied: "2 weeks ago",
-    status: "Applied",
-    icon: Server,
-  },
-  {
-    id: "umbrella-ux-researcher",
-    title: "UX Researcher",
-    company: "Umbrella Labs",
-    employment: "Contract",
-    location: "Remote",
-    applied: "3 weeks ago",
-    status: "Shortlisted",
-    icon: LayoutDashboard,
-  },
-  {
-    id: "globex-platform",
-    title: "Platform Engineer",
-    company: "Globex",
-    employment: "Full-time",
-    location: "On-site",
-    applied: "3 weeks ago",
-    status: "Review",
-    icon: Layers,
-  },
-  {
-    id: "soylent-mobile",
-    title: "Mobile Engineer",
-    company: "Soylent",
-    employment: "Full-time",
-    location: "Hybrid",
-    applied: "1 month ago",
-    status: "Applied",
-    icon: Smartphone,
-  },
-  {
-    id: "vandelay-data-analyst",
-    title: "Data Analyst",
-    company: "Vandelay Industries",
-    employment: "Full-time",
-    location: "Remote",
-    applied: "1 month ago",
-    status: "Rejected",
-    icon: BarChart3,
-  },
-  {
-    id: "acme-devops",
-    title: "DevOps Engineer",
-    company: "Acme Corp",
-    employment: "Full-time",
-    location: "Remote",
-    applied: "1 month ago",
-    status: "Shortlisted",
-    icon: Terminal,
-  },
-  {
-    id: "massive-ml-engineer",
-    title: "Machine Learning Engineer",
-    company: "Massive Dynamic",
-    employment: "Full-time",
-    location: "On-site",
-    applied: "1 month ago",
-    status: "Applied",
-    icon: BrainCircuit,
-  },
-  {
-    id: "piedpiper-fullstack",
-    title: "Full Stack Developer",
-    company: "Pied Piper",
-    employment: "Contract",
-    location: "Hybrid",
-    applied: "2 months ago",
-    status: "Review",
-    icon: Code2,
-  },
-  {
-    id: "wonka-product-manager",
-    title: "Product Manager",
-    company: "Wonka Industries",
-    employment: "Full-time",
-    location: "Hybrid",
-    applied: "2 months ago",
-    status: "Shortlisted",
-    icon: ClipboardList,
-  },
-  {
-    id: "tyrell-security",
-    title: "Security Engineer",
-    company: "Tyrell Corp",
-    employment: "Full-time",
-    location: "On-site",
-    applied: "2 months ago",
-    status: "Offered",
-    icon: ShieldCheck,
-  },
-  {
-    id: "cybertek-sre",
-    title: "Site Reliability Engineer",
-    company: "Cybertek",
-    employment: "Full-time",
-    location: "Remote",
-    applied: "3 months ago",
-    status: "Rejected",
-    icon: Activity,
-  },
-  {
-    id: "nakatomi-frontend",
-    title: "Frontend Developer",
-    company: "Nakatomi Trading",
-    employment: "Contract",
-    location: "Remote",
-    applied: "3 months ago",
-    status: "Applied",
-    icon: Code2,
-  },
-  {
-    id: "bluesun-data-engineer",
-    title: "Data Engineer",
-    company: "Blue Sun",
-    employment: "Full-time",
-    location: "Remote",
-    applied: "3 months ago",
-    status: "Shortlisted",
-    icon: Database,
-  },
-  {
-    id: "weyland-architect",
-    title: "Systems Architect",
-    company: "Weyland-Yutani",
-    employment: "Full-time",
-    location: "Hybrid",
-    applied: "4 months ago",
-    status: "Review",
-    icon: Boxes,
-  },
-  {
-    id: "sterling-brand-designer",
-    title: "Brand Designer",
-    company: "Sterling Cooper",
-    employment: "Contract",
-    location: "Remote",
-    applied: "4 months ago",
-    status: "Applied",
-    icon: Palette,
-  },
-  {
-    id: "dunder-qa",
-    title: "QA Engineer",
-    company: "Dunder Mifflin",
-    employment: "Full-time",
-    location: "On-site",
-    applied: "5 months ago",
-    status: "Rejected",
-    icon: ClipboardCheck,
-  },
-  {
-    id: "waynetech-ios",
-    title: "iOS Engineer",
-    company: "Wayne Tech",
-    employment: "Full-time",
-    location: "Hybrid",
-    applied: "5 months ago",
-    status: "Shortlisted",
-    icon: Smartphone,
-  },
-  {
-    id: "oscorp-mlops",
-    title: "ML Ops Engineer",
-    company: "Oscorp Biotech",
-    employment: "Full-time",
-    location: "Remote",
-    applied: "6 months ago",
-    status: "Applied",
-    icon: Cpu,
-  },
-  {
-    id: "stark-staff-designer",
-    title: "Staff Product Designer",
-    company: "Stark Labs",
-    employment: "Full-time",
-    location: "Remote",
-    applied: "6 months ago",
-    status: "Shortlisted",
-    icon: PenTool,
-  },
-]
+/** Shape returned by GET /api/seeker/applications. */
+type ApiApplication = {
+  id: string
+  jobId: string
+  title: string
+  company: string
+  employment: string
+  location: string
+  category: string
+  status: ApplicationStatus
+  createdAt: string
+}
 
-const ARCHIVED_APPLICATIONS: Application[] = [
-  {
-    id: "archived-northwind-frontend",
-    title: "Frontend Engineer",
-    company: "Northwind Traders",
-    employment: "Full-time",
-    location: "Remote",
-    applied: "7 months ago",
-    status: "Rejected",
-    icon: Code2,
-  },
-  {
-    id: "archived-gringotts-analyst",
-    title: "Financial Analyst",
-    company: "Gringotts",
-    employment: "Full-time",
-    location: "On-site",
-    applied: "8 months ago",
-    status: "Rejected",
-    icon: BarChart3,
-  },
-  {
-    id: "archived-tyrell-ux",
-    title: "UX Designer",
-    company: "Tyrell Corp",
-    employment: "Contract",
-    location: "Hybrid",
-    applied: "8 months ago",
-    status: "Offered",
-    icon: PenTool,
-  },
-  {
-    id: "archived-monarch-pm",
-    title: "Product Manager",
-    company: "Monarch Sciences",
-    employment: "Full-time",
-    location: "On-site",
-    applied: "9 months ago",
-    status: "Rejected",
-    icon: ClipboardList,
-  },
-  {
-    id: "archived-cyberdyne-ml",
-    title: "ML Engineer",
-    company: "Cyberdyne Systems",
-    employment: "Full-time",
-    location: "Hybrid",
-    applied: "10 months ago",
-    status: "Applied",
-    icon: BrainCircuit,
-  },
-  {
-    id: "archived-abstergo-backend",
-    title: "Backend Developer",
-    company: "Abstergo",
-    employment: "Contract",
-    location: "Remote",
-    applied: "11 months ago",
-    status: "Rejected",
-    icon: Server,
-  },
-  {
-    id: "archived-hooli-data",
-    title: "Data Scientist",
-    company: "Hooli Corp",
-    employment: "Full-time",
-    location: "On-site",
-    applied: "1 year ago",
-    status: "Offered",
-    icon: Database,
-  },
-  {
-    id: "archived-virtucon-cloud",
-    title: "Cloud Consultant",
-    company: "Virtucon",
-    employment: "Contract",
-    location: "Remote",
-    applied: "1 year ago",
-    status: "Rejected",
-    icon: Cloud,
-  },
-]
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  Engineering: Code2,
+  Design: PenTool,
+  Marketing: Palette,
+  Infrastructure: Server,
+  Quality: ClipboardCheck,
+  Product: ClipboardList,
+}
+
+/** Settled outcomes live in the Archived tab. */
+const ARCHIVED_STATUSES: ApplicationStatus[] = ["Rejected", "Offered"]
 
 const PAGE_SIZE = 5
 
@@ -384,6 +72,46 @@ const STATUS_STYLES: Record<ApplicationStatus, string> = {
   Shortlisted: "border-[#60a5fa]/25 bg-[#60a5fa]/10 text-[#60a5fa]",
   Rejected: "border-[#ef4444]/25 bg-[#ef4444]/10 text-[#ef4444]",
   Offered: "border-[#22c55e]/25 bg-[#22c55e]/10 text-[#22c55e]",
+}
+
+function formatTimeAgo(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime()
+
+  const minutes = Math.floor(diff / 60_000)
+  if (minutes < 1) return "just now"
+  if (minutes < 60) {
+    return `${minutes} minute${minutes === 1 ? "" : "s"} ago`
+  }
+
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`
+
+  const days = Math.floor(hours / 24)
+  if (days < 7) return `${days} day${days === 1 ? "" : "s"} ago`
+
+  const weeks = Math.floor(days / 7)
+  if (days < 30) return `${weeks} week${weeks === 1 ? "" : "s"} ago`
+
+  const months = Math.floor(days / 30)
+  if (months < 12) return `${months} month${months === 1 ? "" : "s"} ago`
+
+  const years = Math.floor(days / 365)
+  return `${years} year${years === 1 ? "" : "s"} ago`
+}
+
+function toApplication(raw: ApiApplication): Application {
+  return {
+    id: raw.id,
+    jobId: raw.jobId,
+    title: raw.title,
+    company: raw.company,
+    employment: raw.employment,
+    location: raw.location,
+    applied: formatTimeAgo(raw.createdAt),
+    status: raw.status,
+    icon: CATEGORY_ICONS[raw.category] ?? Briefcase,
+    ...(raw.status === "Rejected" ? { tileClassName: "bg-[#b91c1c]" } : {}),
+  }
 }
 
 function StatusBadge({ status }: { status: ApplicationStatus }) {
@@ -482,27 +210,129 @@ function Pagination({
   )
 }
 
+function TableMessage({ children }: { children: React.ReactNode }) {
+  return (
+    <tr className="h-28">
+      <td colSpan={5} className="px-5 text-center text-[13px] leading-5">
+        {children}
+      </td>
+    </tr>
+  )
+}
+
+/** Pure fetch — no setState, so callers decide where results land. */
+async function fetchApplications(): Promise<Application[]> {
+  const response = await fetch("/api/seeker/applications")
+
+  if (!response.ok) {
+    throw new Error()
+  }
+
+  const payload = (await response.json()) as {
+    applications?: ApiApplication[]
+  }
+
+  return (payload.applications ?? []).map(toApplication)
+}
+
 export function ApplicationsView() {
   const [tab, setTab] = useState<"active" | "archived">("active")
   const [page, setPage] = useState(1)
 
-  const applications =
-    tab === "active" ? ACTIVE_APPLICATIONS : ARCHIVED_APPLICATIONS
+  const [applications, setApplications] = useState<Application[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const totalPages = Math.max(1, Math.ceil(applications.length / PAGE_SIZE))
+  // Initial load: setState only inside the promise callbacks, never
+  // synchronously in the effect body (react-hooks/set-state-in-effect).
+  useEffect(() => {
+    let cancelled = false
+
+    fetchApplications().then(
+      (list) => {
+        if (cancelled) return
+        setApplications(list)
+        setError(null)
+        setLoading(false)
+      },
+      () => {
+        if (cancelled) return
+        setApplications([])
+        setError("Could not load your applications.")
+        setLoading(false)
+      },
+    )
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  function handleRetry() {
+    setLoading(true)
+    setError(null)
+
+    fetchApplications().then(
+      (list) => {
+        setApplications(list)
+        setError(null)
+        setLoading(false)
+      },
+      () => {
+        setApplications([])
+        setError("Could not load your applications.")
+        setLoading(false)
+      },
+    )
+  }
+
+  const applicationsForTab = useMemo(() => {
+    if (tab === "active") {
+      return applications.filter(
+        (application) => !ARCHIVED_STATUSES.includes(application.status),
+      )
+    }
+
+    return applications.filter((application) =>
+      ARCHIVED_STATUSES.includes(application.status),
+    )
+  }, [applications, tab])
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(applicationsForTab.length / PAGE_SIZE),
+  )
   const currentPage = Math.min(page, totalPages)
 
   const rows = useMemo(
     () =>
-      applications.slice(
+      applicationsForTab.slice(
         (currentPage - 1) * PAGE_SIZE,
         currentPage * PAGE_SIZE,
       ),
-    [applications, currentPage],
+    [applicationsForTab, currentPage],
   )
 
-  const start = applications.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1
-  const end = Math.min(currentPage * PAGE_SIZE, applications.length)
+  const start =
+    applicationsForTab.length === 0
+      ? 0
+      : (currentPage - 1) * PAGE_SIZE + 1
+  const end = Math.min(
+    currentPage * PAGE_SIZE,
+    applicationsForTab.length,
+  )
+
+  const total = applications.length
+  const shortlisted = applications.filter(
+    (application) => application.status === "Shortlisted",
+  ).length
+  const inReview = applications.filter(
+    (application) => application.status === "Review",
+  ).length
+  const offered = applications.filter(
+    (application) => application.status === "Offered",
+  ).length
+  const successRate = total === 0 ? 0 : Math.round((offered / total) * 100)
 
   return (
     <div className="p-4 pb-16 sm:px-6 sm:pt-6 lg:px-8 lg:pt-6">
@@ -559,12 +389,12 @@ export function ApplicationsView() {
         aria-label="Application summary"
         className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
       >
-        <SummaryCard label="Total Applied" value="24" />
-        <SummaryCard label="Shortlisted" value="8" />
-        <SummaryCard label="Interviews" value="3" />
+        <SummaryCard label="Total Applied" value={String(total)} />
+        <SummaryCard label="Shortlisted" value={String(shortlisted)} />
+        <SummaryCard label="In Review" value={String(inReview)} />
         <SummaryCard
           label="Success Rate"
-          value="12%"
+          value={`${successRate}%`}
           valueClassName="text-[#4ade80]"
         />
       </section>
@@ -607,66 +437,97 @@ export function ApplicationsView() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((application) => {
-                const Icon = application.icon
-
-                return (
-                  <tr
-                    key={application.id}
-                    className="h-16 border-b border-white/[0.06] last:border-0"
+              {loading ? (
+                <TableMessage>
+                  <span className="text-[#8a8a93]">
+                    Loading applications…
+                  </span>
+                </TableMessage>
+              ) : error ? (
+                <TableMessage>
+                  <span className="text-[#8a8a93]">{error}</span>
+                  <button
+                    type="button"
+                    onClick={handleRetry}
+                    className="mt-2 block w-full font-medium text-[#5c53fe] transition-colors hover:text-[#6a62ff]"
                   >
-                    <td className="px-5 py-3">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <span
-                          className={cn(
-                            "grid size-10 shrink-0 place-items-center rounded-lg bg-[#232327]",
-                            application.tileClassName,
-                          )}
+                    Try again
+                  </button>
+                </TableMessage>
+              ) : rows.length === 0 ? (
+                <TableMessage>
+                  <span className="text-[#ededef]">
+                    No {tab === "active" ? "active" : "archived"} applications
+                    yet.
+                  </span>
+                  <Link
+                    href="/jobs"
+                    className="mt-2 block font-medium text-[#5c53fe] transition-colors hover:text-[#6a62ff]"
+                  >
+                    Browse jobs →
+                  </Link>
+                </TableMessage>
+              ) : (
+                rows.map((application) => {
+                  const Icon = application.icon
+
+                  return (
+                    <tr
+                      key={application.id}
+                      className="h-16 border-b border-white/[0.06] last:border-0"
+                    >
+                      <td className="px-5 py-3">
+                        <div className="flex min-w-0 items-center gap-3">
+                          <span
+                            className={cn(
+                              "grid size-10 shrink-0 place-items-center rounded-lg bg-[#232327]",
+                              application.tileClassName,
+                            )}
+                          >
+                            <Icon
+                              aria-hidden="true"
+                              className="size-[18px] text-[#e5e5ea]"
+                              strokeWidth={1.7}
+                            />
+                          </span>
+                          <span className="min-w-0">
+                            <span className="block truncate text-[13px] leading-[18px] font-medium text-[#ededef]">
+                              {application.title}
+                            </span>
+                            <span className="block truncate text-[12px] leading-4 text-[#8a8a93]">
+                              {application.employment} • {application.location}
+                            </span>
+                          </span>
+                        </div>
+                      </td>
+                      <td className="hidden px-5 text-[13px] leading-5 text-[#b4b4bc] md:table-cell">
+                        {application.company}
+                      </td>
+                      <td className="hidden px-5 text-[13px] leading-5 text-[#8a8a93] sm:table-cell">
+                        {application.applied}
+                      </td>
+                      <td className="px-5">
+                        <StatusBadge status={application.status} />
+                      </td>
+                      <td className="px-5 text-right">
+                        <Link
+                          href={`/jobs/${application.jobId}`}
+                          className="text-[13px] leading-5 font-medium text-[#c4c7c8] transition-colors hover:text-white"
                         >
-                          <Icon
-                            aria-hidden="true"
-                            className="size-[18px] text-[#e5e5ea]"
-                            strokeWidth={1.7}
-                          />
-                        </span>
-                        <span className="min-w-0">
-                          <span className="block truncate text-[13px] leading-[18px] font-medium text-[#ededef]">
-                            {application.title}
-                          </span>
-                          <span className="block truncate text-[12px] leading-4 text-[#8a8a93]">
-                            {application.employment} • {application.location}
-                          </span>
-                        </span>
-                      </div>
-                    </td>
-                    <td className="hidden px-5 text-[13px] leading-5 text-[#b4b4bc] md:table-cell">
-                      {application.company}
-                    </td>
-                    <td className="hidden px-5 text-[13px] leading-5 text-[#8a8a93] sm:table-cell">
-                      {application.applied}
-                    </td>
-                    <td className="px-5">
-                      <StatusBadge status={application.status} />
-                    </td>
-                    <td className="px-5 text-right">
-                      <button
-                        type="button"
-                        title="Coming soon"
-                        className="text-[13px] leading-5 font-medium text-[#c4c7c8] transition-colors hover:text-white"
-                      >
-                        Details
-                      </button>
-                    </td>
-                  </tr>
-                )
-              })}
+                          Details
+                        </Link>
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
             </tbody>
           </table>
         </div>
 
         <div className="flex flex-col gap-3 border-t border-white/[0.07] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-[13px] leading-5 text-[#8a8a93]">
-            Showing {start}–{end} of {applications.length} applications
+            Showing {start}–{end} of {applicationsForTab.length} applications
           </p>
           <Pagination
             page={currentPage}
