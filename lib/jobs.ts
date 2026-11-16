@@ -33,6 +33,8 @@ type JobDoc = JobInput & {
   ownerId: string
   applicants: number
   status: JobStatus
+  /** Seeded demo rows — excluded from the free job-post limit. */
+  demo?: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -257,6 +259,19 @@ export async function getJobsForOwner(ownerId: string): Promise<JobDTO[]> {
     .toArray()
 
   return docs.map(toDTO)
+}
+
+/** Free tier: JOB_POST_LIMIT real posts per recruiter, then payment unlocks. */
+export const JOB_POST_LIMIT = 5
+
+/** Counts the owner's own posts — seeded demo rows don't consume the limit. */
+export async function countPostedJobsForOwner(
+  ownerId: string,
+): Promise<number> {
+  return (await collection()).countDocuments({
+    ownerId,
+    demo: { $ne: true },
+  })
 }
 
 export async function getJobForOwner(
@@ -494,6 +509,7 @@ const DEMO_JOBS: Array<
  */
 export async function ensureDemoJobs(ownerId: string) {
   const db = await getDb()
+  const jobs = await collection()
 
   // Atomically claim the seed so concurrent renders can't insert twice.
   const claim = await db.collection("jobSeedState").updateOne(
@@ -503,14 +519,25 @@ export async function ensureDemoJobs(ownerId: string) {
   )
 
   if (claim.upsertedCount === 0) {
+    // Seeds inserted before the demo flag existed — tag them once so they
+    // don't count toward JOB_POST_LIMIT. Match title+company pairs so a real
+    // post that merely shares a title is never misflagged.
+    await jobs.updateMany(
+      {
+        ownerId,
+        demo: { $ne: true },
+        $or: DEMO_JOBS.map(({ title, company }) => ({ title, company })),
+      },
+      { $set: { demo: true } },
+    )
     return
   }
 
-  const existing = await (await collection()).countDocuments({ ownerId })
+  const existing = await jobs.countDocuments({ ownerId })
 
   if (existing === 0) {
-    await (
-      await collection()
-    ).insertMany(DEMO_JOBS.map((job) => ({ ...job, ownerId })))
+    await jobs.insertMany(
+      DEMO_JOBS.map((job) => ({ ...job, ownerId, demo: true })),
+    )
   }
 }

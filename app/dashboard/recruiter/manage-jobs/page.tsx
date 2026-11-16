@@ -4,7 +4,13 @@ import { redirect } from "next/navigation"
 import { ChevronRight, Plus } from "lucide-react"
 
 import { ManageJobsTable } from "@/components/dashboard/manage-jobs-table"
-import { ensureDemoJobs, getJobsForOwner } from "@/lib/jobs"
+import {
+  countPostedJobsForOwner,
+  ensureDemoJobs,
+  getJobsForOwner,
+  JOB_POST_LIMIT,
+} from "@/lib/jobs"
+import { hasApplyUnlock } from "@/lib/payments"
 import { getSession } from "@/lib/session"
 
 export const metadata: Metadata = {
@@ -21,6 +27,12 @@ export default async function ManageJobsPage() {
   await ensureDemoJobs(session.user.id)
 
   const jobs = await getJobsForOwner(session.user.id)
+
+  const [used, unlocked] = await Promise.all([
+    countPostedJobsForOwner(session.user.id),
+    hasApplyUnlock(session.user.id),
+  ])
+  const limitReached = used >= JOB_POST_LIMIT && !unlocked
 
   return (
     <div className="p-4 pb-16 sm:px-6 sm:pt-6 lg:px-8 lg:pt-6">
@@ -48,17 +60,28 @@ export default async function ManageJobsPage() {
           </p>
         </div>
 
-        <Link
-          href="/dashboard/recruiter/add-job"
-          className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-[#5c53fe] px-5 text-[14px] leading-5 font-semibold text-white shadow-[0_10px_30px_-10px_rgba(92,83,254,0.9)] transition-colors hover:bg-[#6a62ff] focus-visible:ring-2 focus-visible:ring-[#5c53fe]/50 focus-visible:outline-none"
-        >
-          <Plus
-            aria-hidden="true"
-            className="size-4"
-            strokeWidth={2.4}
-          />
-          New Job Post
-        </Link>
+        {limitReached ? (
+          <div className="flex shrink-0 flex-col items-end gap-1.5">
+            <Link
+              href="/#pricing"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#f59e0b] px-5 text-[14px] leading-5 font-semibold text-black transition-colors hover:bg-[#fbbf24] focus-visible:ring-2 focus-visible:ring-[#f59e0b]/50 focus-visible:outline-none"
+            >
+              <Plus aria-hidden="true" className="size-4" strokeWidth={2.4} />
+              Add to Cart
+            </Link>
+            <p className="text-[12px] leading-4 text-[#a0a0ab]">
+              All {JOB_POST_LIMIT} free job posts used.
+            </p>
+          </div>
+        ) : (
+          <Link
+            href="/dashboard/recruiter/add-job"
+            className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-[#5c53fe] px-5 text-[14px] leading-5 font-semibold text-white shadow-[0_10px_30px_-10px_rgba(92,83,254,0.9)] transition-colors hover:bg-[#6a62ff] focus-visible:ring-2 focus-visible:ring-[#5c53fe]/50 focus-visible:outline-none"
+          >
+            <Plus aria-hidden="true" className="size-4" strokeWidth={2.4} />
+            New Job Post
+          </Link>
+        )}
       </div>
 
       <ManageJobsTable jobs={jobs} />

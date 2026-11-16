@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
   ArrowRight,
@@ -100,13 +101,7 @@ function StepMarker() {
   )
 }
 
-function SectionHeading({
-  step,
-  title,
-}: {
-  step: number
-  title: string
-}) {
+function SectionHeading({ step, title }: { step: number; title: string }) {
   return (
     <h2 className="flex items-center gap-2.5 text-[16px] leading-6 font-medium tracking-[-0.01em] text-[#ededef]">
       <StepMarker />
@@ -124,6 +119,7 @@ export function PostJobForm({ job }: { job?: JobDTO }) {
   const [pending, setPending] = useState(false)
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [formError, setFormError] = useState<string | null>(null)
+  const [limitReached, setLimitReached] = useState(false)
 
   const categories =
     job && !CATEGORY_OPTIONS.includes(job.category)
@@ -152,6 +148,7 @@ export function PostJobForm({ job }: { job?: JobDTO }) {
     setPending(true)
     setFieldErrors({})
     setFormError(null)
+    setLimitReached(false)
 
     try {
       const endpoint = job ? `/api/jobs/${job.id}` : "/api/jobs"
@@ -160,15 +157,21 @@ export function PostJobForm({ job }: { job?: JobDTO }) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify(payload),
       })
-      const data = (await response.json().catch(() => null)) as
-        | { error?: string; fieldErrors?: FieldErrors }
-        | null
+      const data = (await response.json().catch(() => null)) as {
+        error?: string
+        fieldErrors?: FieldErrors
+      } | null
+
+      if (response.status === 402) {
+        // Free job posts exhausted — swap the error for the pricing CTA.
+        setLimitReached(true)
+        setFormError(data?.error ?? "All 5 free job posts used.")
+        return
+      }
 
       if (!response.ok) {
         setFieldErrors(data?.fieldErrors ?? {})
-        setFormError(
-          data?.error ?? "Something went wrong. Please try again.",
-        )
+        setFormError(data?.error ?? "Something went wrong. Please try again.")
         return
       }
 
@@ -243,9 +246,22 @@ export function PostJobForm({ job }: { job?: JobDTO }) {
       {formError && (
         <div
           role="alert"
-          className="mt-6 rounded-lg border border-[#ef4444]/30 bg-[#ef4444]/10 px-4 py-3 text-[13px] leading-5 text-[#f87171]"
+          className={cn(
+            "mt-6 rounded-lg border px-4 py-3 text-[13px] leading-5",
+            limitReached
+              ? "flex flex-col items-start gap-3 border-[#f59e0b]/30 bg-[#f59e0b]/10 text-[#fbbf24]"
+              : "border-[#ef4444]/30 bg-[#ef4444]/10 text-[#f87171]"
+          )}
         >
-          {formError}
+          <span>{formError}</span>
+          {limitReached && (
+            <Link
+              href="/#pricing"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#f59e0b] px-5 py-2.5 text-[13px] font-semibold text-black transition-colors hover:bg-[#fbbf24]"
+            >
+              Add to Cart
+            </Link>
+          )}
         </div>
       )}
 
@@ -267,7 +283,9 @@ export function PostJobForm({ job }: { job?: JobDTO }) {
               name="jobTitle"
               defaultValue={job?.title ?? "Frontend Developer"}
               aria-invalid={Boolean(fieldErrors.title)}
-              aria-describedby={fieldErrors.title ? "job-title-error" : undefined}
+              aria-describedby={
+                fieldErrors.title ? "job-title-error" : undefined
+              }
               className={cn(FIELD_CLASS, fieldErrors.title && INVALID_CLASS)}
             />
             <FieldError id="job-title" message={fieldErrors.title} />
@@ -295,7 +313,7 @@ export function PostJobForm({ job }: { job?: JobDTO }) {
                   className={cn(
                     FIELD_CLASS,
                     "pl-10",
-                    fieldErrors.company && INVALID_CLASS,
+                    fieldErrors.company && INVALID_CLASS
                   )}
                 />
               </div>
@@ -318,7 +336,7 @@ export function PostJobForm({ job }: { job?: JobDTO }) {
                   className={cn(
                     FIELD_CLASS,
                     "appearance-none pr-10",
-                    fieldErrors.category && INVALID_CLASS,
+                    fieldErrors.category && INVALID_CLASS
                   )}
                 >
                   {categories.map((category) => (
@@ -360,7 +378,7 @@ export function PostJobForm({ job }: { job?: JobDTO }) {
                       "h-10 rounded-lg border text-[14px] leading-5 font-medium transition-colors",
                       active
                         ? "border-[#5c53fe]/70 bg-[#5c53fe]/12 text-[#ededef]"
-                        : "border-white/[0.07] bg-[#141418] text-[#a0a0ab] hover:bg-[#1a1a1f] hover:text-[#ededef]",
+                        : "border-white/[0.07] bg-[#141418] text-[#a0a0ab] hover:bg-[#1a1a1f] hover:text-[#ededef]"
                     )}
                   >
                     {type}
@@ -378,10 +396,7 @@ export function PostJobForm({ job }: { job?: JobDTO }) {
 
         {/* 2. Location, Compensation & Timeline */}
         <section className="space-y-5">
-          <SectionHeading
-            step={2}
-            title="Location, Compensation & Timeline"
-          />
+          <SectionHeading step={2} title="Location, Compensation & Timeline" />
 
           <div className="flex items-center gap-4 rounded-xl border border-white/[0.07] bg-[#141418] px-5 py-4">
             <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[#222228]">
@@ -407,15 +422,13 @@ export function PostJobForm({ job }: { job?: JobDTO }) {
               onClick={() => setIsRemote((value) => !value)}
               className={cn(
                 "relative ml-auto h-6 w-11 shrink-0 rounded-full border border-white/[0.08] transition-colors",
-                isRemote ? "bg-[#2a2a33]" : "bg-[#141418]",
+                isRemote ? "bg-[#2a2a33]" : "bg-[#141418]"
               )}
             >
               <span
                 className={cn(
                   "absolute top-1/2 size-[18px] -translate-y-1/2 rounded-full transition-all duration-200",
-                  isRemote
-                    ? "right-[3px] bg-white"
-                    : "left-[3px] bg-[#6e6e78]",
+                  isRemote ? "right-[3px] bg-white" : "left-[3px] bg-[#6e6e78]"
                 )}
               />
             </button>
@@ -443,7 +456,7 @@ export function PostJobForm({ job }: { job?: JobDTO }) {
                   className={cn(
                     FIELD_CLASS,
                     "pl-10",
-                    fieldErrors.location && INVALID_CLASS,
+                    fieldErrors.location && INVALID_CLASS
                   )}
                 />
               </div>
@@ -484,7 +497,7 @@ export function PostJobForm({ job }: { job?: JobDTO }) {
                   className={cn(
                     FIELD_CLASS,
                     "pl-10",
-                    fieldErrors.deadline && INVALID_CLASS,
+                    fieldErrors.deadline && INVALID_CLASS
                   )}
                 />
               </div>
@@ -517,7 +530,7 @@ export function PostJobForm({ job }: { job?: JobDTO }) {
                   className={cn(
                     FIELD_CLASS,
                     "pl-8",
-                    fieldErrors.minSalary && INVALID_CLASS,
+                    fieldErrors.minSalary && INVALID_CLASS
                   )}
                 />
               </div>
@@ -545,7 +558,7 @@ export function PostJobForm({ job }: { job?: JobDTO }) {
                   className={cn(
                     FIELD_CLASS,
                     "pl-8",
-                    fieldErrors.maxSalary && INVALID_CLASS,
+                    fieldErrors.maxSalary && INVALID_CLASS
                   )}
                 />
               </div>
@@ -566,7 +579,7 @@ export function PostJobForm({ job }: { job?: JobDTO }) {
                   className={cn(
                     FIELD_CLASS,
                     "appearance-none pr-10",
-                    fieldErrors.frequency && INVALID_CLASS,
+                    fieldErrors.frequency && INVALID_CLASS
                   )}
                 >
                   {JOB_FREQUENCIES.map((frequency) => (
@@ -613,7 +626,7 @@ export function PostJobForm({ job }: { job?: JobDTO }) {
               }
               className={cn(
                 TEXTAREA_CLASS,
-                fieldErrors.responsibilities && INVALID_CLASS,
+                fieldErrors.responsibilities && INVALID_CLASS
               )}
             />
             <FieldError
@@ -640,7 +653,7 @@ export function PostJobForm({ job }: { job?: JobDTO }) {
               }
               className={cn(
                 TEXTAREA_CLASS,
-                fieldErrors.qualifications && INVALID_CLASS,
+                fieldErrors.qualifications && INVALID_CLASS
               )}
             />
             <FieldError

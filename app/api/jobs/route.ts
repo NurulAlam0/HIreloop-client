@@ -2,10 +2,13 @@ import { headers } from "next/headers"
 import { NextResponse } from "next/server"
 
 import { auth } from "@/lib/auth"
+import { hasApplyUnlock } from "@/lib/payments"
 import {
+  countPostedJobsForOwner,
   createJob,
   ensureDemoJobs,
   getJobsForOwner,
+  JOB_POST_LIMIT,
   validateJobInput,
 } from "@/lib/jobs"
 
@@ -61,6 +64,19 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: "Please fix the highlighted fields.", fieldErrors: errors },
       { status: 400 },
+    )
+  }
+
+  // Free tier: JOB_POST_LIMIT real posts, then the paid plans unlock more.
+  const [used, unlocked] = await Promise.all([
+    countPostedJobsForOwner(userId),
+    hasApplyUnlock(userId),
+  ])
+
+  if (used >= JOB_POST_LIMIT && !unlocked) {
+    return NextResponse.json(
+      { error: `All ${JOB_POST_LIMIT} free job posts used.`, code: "job-limit" },
+      { status: 402 },
     )
   }
 
